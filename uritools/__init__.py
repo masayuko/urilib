@@ -14,7 +14,8 @@ from .encoding import (idndecode, idnencode, uriencode, uriencode_plus,
                        uridecode, uridecode_plus, uridecode_safe,
                        uridecode_safe_plus)
 from .join import urijoin
-from .split import SplitResult, urisplit, uriunsplit
+from .normalize import urinormalize
+from .split import SplitResult, querylist, urisplit, uriunsplit
 
 __all__ = (
     'GEN_DELIMS',
@@ -26,6 +27,7 @@ __all__ = (
     'uricompose',
     'idndecode',
     'idnencode',
+    'querylist',
     'uriencode',
     'uriencode_plus',
     'uridecode',
@@ -33,6 +35,7 @@ __all__ = (
     'uridecode_safe_plus',
     'uridefrag',
     'urijoin',
+    'urinormalize',
     'urisplit',
     'uriunsplit'
 )

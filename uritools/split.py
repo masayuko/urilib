@@ -178,22 +178,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         return a list of `(name, value)` tuples.
 
         """
-        if self.query:
-            qsl = [self.query]
-        else:
-            return []
-        for sep in self.QUERYSEP:
-            qsl = [s for qs in qsl for s in qs.split(sep) if s]
-        items = []
-        for qs in qsl:
-            parts = qs.partition(self.EQ)
-            name = uridecode(parts[0], encoding, errors)
-            if parts[1]:
-                value = uridecode(parts[2], encoding, errors)
-            else:
-                value = None
-            items.append((name, value))
-        return items
+        return querylist(self.query)
 
     def getfragment(self, default=None, encoding='utf-8', errors='replace'):
         """Return the decoded fragment identifier, or `default` if the
@@ -341,3 +326,31 @@ def uriunsplit(parts):
     else:
         result = SplitResultString
     return result(scheme, authority, path, query, fragment).geturi()
+
+
+def querylist(query, encoding='utf-8', errors='replace'):
+    """Split the query component into individual `name=value` pairs and
+    return a list of `(name, value)` tuples.
+    """
+    if query:
+        qsl = [query]
+    else:
+        return []
+    if isinstance(query, bytes):
+        QUERYSEP = (b';', b'&')
+        EQ = b'='
+    else:
+        QUERYSEP = ';&'
+        EQ = '='
+    for sep in QUERYSEP:
+        qsl = [s for qs in qsl for s in qs.split(sep) if s]
+    items = []
+    for qs in qsl:
+        parts = qs.partition(EQ)
+        name = uridecode_safe_plus(parts[0], encoding, errors)
+        if parts[1]:
+            value = uridecode_safe_plus(parts[2], encoding, errors)
+        else:
+            value = None
+        items.append((name, value))
+    return items
