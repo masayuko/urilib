@@ -1,10 +1,8 @@
-from __future__ import unicode_literals
-
 import collections
 import ipaddress
 import re
 
-from .encoding import uridecode
+from .encoding import uridecode_safe, uridecode_safe_plus, idndecode
 
 _URI_COMPONENTS = ('scheme', 'authority', 'path', 'query', 'fragment')
 
@@ -105,12 +103,9 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         scheme = self.scheme
         if scheme is None:
             return default
-        elif isinstance(scheme, bytes):
-            return scheme.decode('ascii').lower()
-        else:
-            return scheme.lower()
+        return scheme.lower()
 
-    def getuserinfo(self, default=None, encoding='utf-8', errors='strict'):
+    def getuserinfo(self, default=None, encoding='utf-8', errors='replace'):
         """Return the decoded userinfo subcomponent of the URI authority, or
         `default` if the original URI did not contain a userinfo
         field.
@@ -120,7 +115,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         if userinfo is None:
             return default
         else:
-            return uridecode(userinfo, encoding, errors)
+            return uridecode_safe(userinfo, encoding, errors)
 
     def gethost(self, default=None):
         """Return the decoded host subcomponent of the URI authority as a
@@ -136,7 +131,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         elif host.startswith(self.LBRACKET) or host.endswith(self.RBRACKET):
             raise ValueError('Invalid host %r' % host)  # FIXME: remove?
         else:
-            return _ipv4_address(host) or uridecode(host, 'utf-8').lower()
+            return _ipv4_address(host) or idndecode(host).lower()
 
     def getport(self, default=None):
         """Return the port subcomponent of the URI authority as an
@@ -150,12 +145,12 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         else:
             return default
 
-    def getpath(self, encoding='utf-8', errors='strict'):
+    def getpath(self, encoding='utf-8', errors='replace'):
         """Return the normalized decoded URI path."""
         path = self.__remove_dot_segments(self.path)
-        return uridecode(path, encoding, errors)
+        return uridecode_safe(path, encoding, errors)
 
-    def getquery(self, default=None, encoding='utf-8', errors='strict'):
+    def getquery(self, default=None, encoding='utf-8', errors='replace'):
         """Return the decoded query string, or `default` if the original URI
         did not contain a query component.
 
@@ -164,9 +159,9 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         if query is None:
             return default
         else:
-            return uridecode(query, encoding, errors)
+            return uridecode_safe_plus(query, encoding, errors)
 
-    def getquerydict(self, encoding='utf-8', errors='strict'):
+    def getquerydict(self, encoding='utf-8', errors='replace'):
         """Split the query component into individual `name=value` pairs and
         return a dictionary of query variables.  The dictionary keys
         are the unique query variable names and the values are lists
@@ -178,7 +173,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
             dict[name].append(value)
         return dict
 
-    def getquerylist(self, encoding='utf-8', errors='strict'):
+    def getquerylist(self, encoding='utf-8', errors='replace'):
         """Split the query component into individual `name=value` pairs and
         return a list of `(name, value)` tuples.
 
@@ -200,7 +195,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
             items.append((name, value))
         return items
 
-    def getfragment(self, default=None, encoding='utf-8', errors='strict'):
+    def getfragment(self, default=None, encoding='utf-8', errors='replace'):
         """Return the decoded fragment identifier, or `default` if the
         original URI did not contain a fragment component.
 
@@ -209,7 +204,7 @@ class SplitResult(collections.namedtuple('SplitResult', _URI_COMPONENTS)):
         if fragment is None:
             return default
         else:
-            return uridecode(fragment, encoding, errors)
+            return uridecode_safe_plus(fragment, encoding, errors)
 
     def transform(self, ref, strict=False):
         """Transform a URI reference relative to `self` into a

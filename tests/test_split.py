@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-
+# -*- coding: utf-8 -*-
 import unittest
 
 from uritools import urisplit
@@ -7,7 +6,7 @@ from uritools import urisplit
 
 class SplitTest(unittest.TestCase):
 
-    def check(self, uri, parts, decoded=None):
+    def check(self, uri, parts):
         result = urisplit(uri)
         self.assertEqual(result, parts, 'Error parsing %r' % uri)
         self.assertEqual(result.geturi(), uri, 'Error recomposing %r' % uri)
@@ -20,14 +19,32 @@ class SplitTest(unittest.TestCase):
               'nose')),
             ('urn:example:animal:ferret:nose',
              ('urn', None, 'example:animal:ferret:nose', None, None)),
-            (b'foo://example.com:8042/over/there?name=ferret#nose',
-             (b'foo', b'example.com:8042', b'/over/there', b'name=ferret',
-              b'nose')),
-            (b'urn:example:animal:ferret:nose',
-             (b'urn', None, b'example:animal:ferret:nose', None, None)),
         ]
         for uri, parts in cases:
             self.check(uri, parts)
+
+    def test_idn(self):
+        """international domain name"""
+        cases = [
+            ('https://xn--gckc5l.xn--fsq.jp/%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA/%E3%83%91%E3%82%B9?%E5%A4%89%E6%95%B0=%E5%80%A4#%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%88',
+             ('https', 'xn--gckc5l.xn--fsq.jp', '/%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA/%E3%83%91%E3%82%B9', '%E5%A4%89%E6%95%B0=%E5%80%A4',
+              '%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%88')),
+        ]
+        for uri, parts in cases:
+            result = urisplit(uri)
+            self.assertEqual(result, parts, 'Error parsing %r' % uri)
+            self.assertEqual(result.geturi(), uri, 'Error recomposing %r' % uri)
+            self.assertEqual(result.getscheme(), 'https')
+            self.assertEqual(result.gethost(), 'ウェブ.例.jp')
+            self.assertEqual(result.host, 'xn--gckc5l.xn--fsq.jp')
+            self.assertEqual(result.getpath(), '/ディレクトリ/パス')
+            self.assertEqual(result.path, '/%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA/%E3%83%91%E3%82%B9')
+            self.assertEqual(result.getquery(), '変数=値')
+            self.assertEqual(result.query, '%E5%A4%89%E6%95%B0=%E5%80%A4')
+            self.assertEqual(result.getquerydict(), {'変数': ['値']})
+            self.assertEqual(result.getquerylist(), [('変数', '値')])
+            self.assertEqual(result.getfragment(), 'フラグメント')
+            self.assertEqual(result.fragment, '%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%88')
 
     def test_abnormal(self):
         cases = [
@@ -48,23 +65,6 @@ class SplitTest(unittest.TestCase):
             ('?#', (None, None, '', '', '')),
             ('#', (None, None, '', None, '')),
             ('##', (None, None, '', None, '#')),
-            (b'', (None, None, b'', None, None)),
-            (b':', (None, None, b':', None, None)),
-            (b':/', (None, None, b':/', None, None)),
-            (b'://', (None, None, b'://', None, None)),
-            (b'://?', (None, None, b'://', b'', None)),
-            (b'://#', (None, None, b'://', None, b'')),
-            (b'://?#', (None, None, b'://', b'', b'')),
-            (b'//', (None, b'', b'', None, None)),
-            (b'///', (None, b'', b'/', None, None)),
-            (b'//?', (None, b'', b'', b'', None)),
-            (b'//#', (None, b'', b'', None, b'')),
-            (b'//?#', (None, b'', b'', b'', b'')),
-            (b'?', (None, None, b'', b'', None)),
-            (b'??', (None, None, b'', b'?', None)),
-            (b'?#', (None, None, b'', b'', b'')),
-            (b'#', (None, None, b'', None, b'')),
-            (b'##', (None, None, b'', None, b'#')),
         ]
         for uri, parts in cases:
             self.check(uri, parts)
@@ -133,90 +133,22 @@ class SplitTest(unittest.TestCase):
         self.assertEqual(list(result.getquerylist()), [])
         self.assertEqual(result.getfragment(), None)
 
-        uri = b'foo://user@example.com:8042/over/there?name=ferret#nose'
-        result = urisplit(uri)
-        self.assertEqual(result.scheme, b'foo')
-        self.assertEqual(result.authority, b'user@example.com:8042')
-        self.assertEqual(result.path, b'/over/there')
-        self.assertEqual(result.query, b'name=ferret')
-        self.assertEqual(result.fragment, b'nose')
-        self.assertEqual(result.userinfo, b'user')
-        self.assertEqual(result.host, b'example.com')
-        self.assertEqual(result.port, b'8042')
-        self.assertEqual(result.geturi(), uri)
-        self.assertEqual(result.getscheme(), 'foo')
-        self.assertEqual(result.getuserinfo(), 'user')
-        self.assertEqual(result.gethost(), 'example.com')
-        self.assertEqual(result.getport(), 8042)
-        self.assertEqual(result.getpath(), '/over/there')
-        self.assertEqual(result.getquery(), 'name=ferret')
-        self.assertEqual(dict(result.getquerydict()), {'name': ['ferret']})
-        self.assertEqual(list(result.getquerylist()), [('name', 'ferret')])
-        self.assertEqual(result.getfragment(), 'nose')
-
-        uri = b'urn:example:animal:ferret:nose'
-        result = urisplit(uri)
-        self.assertEqual(result.scheme, b'urn')
-        self.assertEqual(result.authority, None)
-        self.assertEqual(result.path, b'example:animal:ferret:nose')
-        self.assertEqual(result.query, None)
-        self.assertEqual(result.fragment, None)
-        self.assertEqual(result.userinfo, None)
-        self.assertEqual(result.host, None)
-        self.assertEqual(result.port, None)
-        self.assertEqual(result.geturi(), uri)
-        self.assertEqual(result.getscheme(), 'urn')
-        self.assertEqual(result.getuserinfo(), None)
-        self.assertEqual(result.gethost(), None)
-        self.assertEqual(result.getport(), None)
-        self.assertEqual(result.getpath(), 'example:animal:ferret:nose')
-        self.assertEqual(result.getquery(), None)
-        self.assertEqual(dict(result.getquerydict()), {})
-        self.assertEqual(list(result.getquerylist()), [])
-        self.assertEqual(result.getfragment(), None)
-
-        uri = b'file:///'
-        result = urisplit(uri)
-        self.assertEqual(result.scheme, b'file')
-        self.assertEqual(result.authority, b'')
-        self.assertEqual(result.path, b'/')
-        self.assertEqual(result.query, None)
-        self.assertEqual(result.fragment, None)
-        self.assertEqual(result.userinfo, None)
-        self.assertEqual(result.host, b'')
-        self.assertEqual(result.port, None)
-        self.assertEqual(result.geturi(), uri)
-        self.assertEqual(result.getscheme(), 'file')
-        self.assertEqual(result.getuserinfo(), None)
-        self.assertEqual(result.gethost(), '')
-        self.assertEqual(result.getport(), None)
-        self.assertEqual(result.getpath(), '/')
-        self.assertEqual(result.getquery(), None)
-        self.assertEqual(dict(result.getquerydict()), {})
-        self.assertEqual(list(result.getquerylist()), [])
-        self.assertEqual(result.getfragment(), None)
-
     def test_getscheme(self):
         self.assertEqual(urisplit('foo').getscheme(default='bar'), 'bar')
         self.assertEqual(urisplit('FOO_BAR:/').getscheme(), 'foo_bar')
-        self.assertEqual(urisplit(b'foo').getscheme(default='bar'), 'bar')
-        self.assertEqual(urisplit(b'FOO_BAR:/').getscheme(), 'foo_bar')
 
     def test_gethost(self):
         from ipaddress import IPv4Address, IPv6Address
         cases = [
             ('http://Test.python.org:5432/foo/', 'test.python.org'),
-            ('http://12.34.56.78:5432/foo/', IPv4Address('12.34.56.78')),
-            ('http://[::1]:5432/foo/', IPv6Address('::1')),
+            ('http://12.34.56.78:5432/foo/', IPv4Address(u'12.34.56.78')),
+            ('http://[::1]:5432/foo/', IPv6Address(u'::1')),
         ]
         for uri, host in cases:
             self.assertEqual(urisplit(uri).gethost(), host)
-            self.assertEqual(urisplit(uri.encode()).gethost(), host)
         for uri in ['http://[::1/', 'http://::1]/']:
             with self.assertRaises(ValueError, msg='%r' % uri):
                 urisplit(uri).gethost()
-            with self.assertRaises(ValueError, msg='%r' % uri):
-                urisplit(uri.encode()).gethost()
 
     def test_getport(self):
         for uri in ['foo://bar', 'foo://bar:', 'foo://bar/', 'foo://bar:/']:
@@ -260,11 +192,7 @@ class SplitTest(unittest.TestCase):
         for uri, relpath, abspath in cases:
             parts = urisplit(uri)
             self.assertEqual(relpath, parts.getpath())
-            parts = urisplit(uri.encode('ascii'))
-            self.assertEqual(relpath, parts.getpath())
             parts = urisplit('/' + uri)
-            self.assertEqual(abspath, parts.getpath())
-            parts = urisplit(('/' + uri).encode('ascii'))
             self.assertEqual(abspath, parts.getpath())
 
     def test_getquery(self):
@@ -288,11 +216,17 @@ class SplitTest(unittest.TestCase):
              [('a', 'b')],
              {'a': ['b']}),
             ("?a=a+b&b=b+c",
-             [('a', 'a+b'), ('b', 'b+c')],
-             {'a': ['a+b'], 'b': ['b+c']}),
+             [('a', 'a b'), ('b', 'b c')],
+             {'a': ['a b'], 'b': ['b c']}),
             ("?a=a%20b&b=b%20c",
              [('a', 'a b'), ('b', 'b c')],
              {'a': ['a b'], 'b': ['b c']}),
+            ("?a=a%20+b&b=b%20+c",
+             [('a', 'a  b'), ('b', 'b  c')],
+             {'a': ['a  b'], 'b': ['b  c']}),
+            ("?a=a%2B+b&b=b%2B+c",
+             [('a', 'a+ b'), ('b', 'b+ c')],
+             {'a': ['a+ b'], 'b': ['b+ c']}),
             ("?a=1&a=2",
              [('a', '1'), ('a', '2')],
              {'a': ['1', '2']}),
@@ -337,9 +271,6 @@ class SplitTest(unittest.TestCase):
             parts = urisplit(uri)
             self.assertEqual(host, str(parts.gethost()))
             self.assertEqual(port, parts.getport())
-            parts = urisplit(uri.encode('ascii'))
-            self.assertEqual(host, str(parts.gethost()))
-            self.assertEqual(port, parts.getport())
 
     def test_invalid_ip_literal(self):
         uris = [
@@ -353,5 +284,3 @@ class SplitTest(unittest.TestCase):
         for uri in uris:
             with self.assertRaises(ValueError, msg='%r' % uri):
                 urisplit(uri).gethost()
-            with self.assertRaises(ValueError, msg='%r' % uri.encode('ascii')):
-                urisplit(uri.encode('ascii')).gethost()

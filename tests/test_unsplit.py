@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import unittest
 
 from uritools import uriunsplit
@@ -19,11 +17,6 @@ class UnsplitTest(unittest.TestCase):
              'foo://example.com:8042/over/there?name=ferret#nose'),
             (('urn', None, 'example:animal:ferret:nose', None, None),
              'urn:example:animal:ferret:nose'),
-            ((b'foo', b'example.com:8042', b'/over/there', b'name=ferret',
-              b'nose'),
-             b'foo://example.com:8042/over/there?name=ferret#nose'),
-            ((b'urn', None, b'example:animal:ferret:nose', None, None),
-             b'urn:example:animal:ferret:nose'),
         ]
         for uri, parts in cases:
             self.check(uri, parts)
