@@ -1,86 +1,112 @@
-from __future__ import unicode_literals
-
+# -*- coding: utf-8 -*-
 import unittest
 
-from uritools import RESERVED, UNRESERVED, uridecode, uriencode
+from uritools import (RESERVED, UNRESERVED, uriencode, uriencode_plus,
+                      uridecode, uridecode_plus, uridecode_safe,
+                      uridecode_safe_plus)
 
 
 class EncodingTest(unittest.TestCase):
 
-    def check(self, decoded, encoded, safe=b'', encoding='utf-8'):
+    def check(self, decoded, encoded, safe='', encoding='utf-8'):
         self.assertEqual(uriencode(decoded, safe, encoding), encoded)
         self.assertEqual(uridecode(encoded, encoding), decoded)
-        # swap bytes/string types
-        self.assertEqual(uriencode(decoded.encode(encoding), safe, encoding), encoded)  # noqa
-        self.assertEqual(uridecode(encoded.decode('ascii'), encoding), decoded)
 
     def test_encoding(self):
         cases = [
-            ('', b''),
-            (' ', b'%20'),
-            ('%', b'%25'),
-            ('~', b'~'),
-            (UNRESERVED, UNRESERVED.encode('ascii')),
+            ('', ''),
+            (' ', '%20'),
+            ('%', '%25'),
+            ('~', '~'),
+            (UNRESERVED, UNRESERVED),
         ]
         for decoded, encoded in cases:
             self.check(decoded, encoded)
 
     def test_safe_encoding(self):
         cases = [
-            ('', b'', ''),
-            (' ', b' ', ' '),
-            ('%', b'%', '%'),
-            (RESERVED, RESERVED.encode('ascii'), RESERVED)
+            ('', '', ''),
+            (' ', ' ', ' '),
+            ('%', '%', '%'),
+            (RESERVED, RESERVED, RESERVED)
         ]
         for decoded, encoded, safe in cases:
             self.check(decoded, encoded, safe)
 
     def test_utf8_encoding(self):
         cases = [
-            ('\xf6lk\xfcrbis', b'%C3%B6lk%C3%BCrbis')
+            (u'ölkürbis', u'%C3%B6lk%C3%BCrbis'),
+            (u'ölkürbis'.encode('utf-8'), b'%C3%B6lk%C3%BCrbis')
         ]
         for decoded, encoded in cases:
             self.check(decoded, encoded, encoding='utf-8')
 
     def test_latin1_encoding(self):
         cases = [
-            ('\xf6lk\xfcrbis', b'%F6lk%FCrbis')
+            (u'ölkürbis', u'%F6lk%FCrbis'),
+            (u'ölkürbis'.encode('latin-1'), b'%F6lk%FCrbis'),
         ]
         for decoded, encoded in cases:
             self.check(decoded, encoded, encoding='latin-1')
 
-    def test_idna_encoding(self):
-        cases = [
-            ('\xf6lk\xfcrbis', b'xn--lkrbis-vxa4c')
-        ]
-        for decoded, encoded in cases:
-            self.check(decoded, encoded, encoding='idna')
-
     def test_decode_bytes(self):
         cases = [
-            ('%F6lk%FCrbis', b'\xf6lk\xfcrbis'),
-            (b'%F6lk%FCrbis', b'\xf6lk\xfcrbis')
+            (u'%F6lk%FCrbis', u'ölkürbis'),
+            (b'%F6lk%FCrbis', u'ölkürbis'.encode('iso-8859-1'))
         ]
         for input, output in cases:
-            self.assertEqual(uridecode(input, encoding=None), output)
+            self.assertEqual(uridecode(input, encoding='iso-8859-1'), output)
+
+    def test_uriencode(self):
+        cases = [
+            ('%', '%25'),
+            ('あい', '%E3%81%82%E3%81%84'),
+            ('あ い', '%E3%81%82%20%E3%81%84'),
+        ]
+        for input, output in cases:
+            self.assertEqual(uriencode(input), output)
+
+    def test_uriencode(self):
+        cases = [
+            ('%', '%25'),
+            ('あい', '%E3%81%82%E3%81%84'),
+            ('あ い', '%E3%81%82%20%E3%81%84'),
+        ]
+        for input, output in cases:
+            self.assertEqual(uriencode(input), output)
+
+    def test_uridecode(self):
+        cases = [
+            ('%', '%'),
+            (b'%', b'%'),
+            ('%ZZ', '%ZZ'),
+            (b'%ZZ', b'%ZZ'),
+            ('%Z', '%Z'),
+            (b'%Z', b'%Z'),
+            ('%Z%E3%81%82', '%Zあ'),
+            ('%Z%E3%81%82a', '%Zあa')
+        ]
+        for input, output in cases:
+            self.assertEqual(uridecode(input), output)
+
+    def test_uridecode_safe(self):
+        cases = [
+            ('%', '%'),
+            (b'%', b'%'),
+            ('%ZZ', '%ZZ'),
+            (b'%ZZ', b'%ZZ'),
+            ('%Z', '%Z'),
+            (b'%Z', b'%Z'),
+            ('%Z%E3%81%82', '%Zあ'),
+            ('%Z%E3%81%82a', '%Zあa'),
+            ('%Z%19%E3%81%82', '%Z%19あ')
+        ]
+        for input, output in cases:
+            self.assertEqual(uridecode_safe(input), output)
 
     def test_encode_bytes(self):
         cases = [
             (b'\xf6lk\xfcrbis', b'%F6lk%FCrbis')
         ]
         for input, output in cases:
-            self.assertEqual(uriencode(input, encoding=None), output)
-
-    def test_decode_errors(self):
-        cases = [
-            (UnicodeError, b'%FF', 'utf-8'),
-        ]
-        for exception, string, encoding in cases:
-            self.assertRaises(exception, uridecode, string, encoding)
-
-    def test_encode_errors(self):
-        cases = [
-            (UnicodeError, '\xff', b'', 'ascii'),
-        ]
-        for exception, string, safe, encoding in cases:
-            self.assertRaises(exception, uriencode, string, safe, encoding)
+            self.assertEqual(uriencode(input), output)

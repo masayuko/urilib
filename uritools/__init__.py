@@ -10,7 +10,9 @@ commonly used functions of the Python 2.7 Standard Library
 from .chars import GEN_DELIMS, RESERVED, SUB_DELIMS, UNRESERVED
 from .compose import uricompose
 from .defrag import DefragResult, uridefrag
-from .encoding import uridecode, uriencode
+from .encoding import (idndecode, idnencode, uriencode, uriencode_plus,
+                       uridecode, uridecode_plus, uridecode_safe,
+                       uridecode_safe_plus)
 from .join import urijoin
 from .split import SplitResult, urisplit, uriunsplit
 
@@ -22,9 +24,14 @@ __all__ = (
     'DefragResult',
     'SplitResult',
     'uricompose',
-    'uridecode',
-    'uridefrag',
+    'idndecode',
+    'idnencode',
     'uriencode',
+    'uriencode_plus',
+    'uridecode',
+    'uridecode_safe',
+    'uridecode_safe_plus',
+    'uridefrag',
     'urijoin',
     'urisplit',
     'uriunsplit'
