@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from .split import urisplit
 
 
@@ -8,9 +6,4 @@ def urijoin(base, ref, strict=False):
     string.
 
     """
-    if isinstance(base, type(ref)):
-        return urisplit(base).transform(ref, strict).geturi()
-    elif isinstance(base, bytes):
-        return urisplit(base.decode()).transform(ref, strict).geturi()
-    else:
-        return urisplit(base).transform(ref.decode(), strict).geturi()
+    return urisplit(base).transform(ref, strict).geturi()
