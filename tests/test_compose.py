@@ -1,5 +1,4 @@
-from __future__ import unicode_literals
-
+# -*- coding: utf-8 -*-
 import ipaddress
 import unittest
 
@@ -30,46 +29,46 @@ class ComposeTest(unittest.TestCase):
             path='example:animal:ferret:nose'
         )
 
+    def test_idn(self):
+        """international domain name"""
+        self.check(
+            'https://xn--gckc5l.xn--fsq.jp/%E3%83%87%E3%82%A3%E3%83%AC%E3%82%AF%E3%83%88%E3%83%AA/%E3%83%91%E3%82%B9?%E5%A4%89%E6%95%B0=%E5%80%A4#%E3%83%95%E3%83%A9%E3%82%B0%E3%83%A1%E3%83%B3%E3%83%88',
+            scheme='https',
+            authority='ウェブ.例.jp',
+            path='/ディレクトリ/パス',
+            query='変数=値',
+            fragment='フラグメント'
+        )
+
     def test_scheme(self):
         cases = [
             ('foo+bar:', 'foo+bar'),
-            ('foo+bar:', b'foo+bar'),
             ('foo+bar:', 'FOO+BAR'),
-            ('foo+bar:', b'FOO+BAR'),
         ]
         for uri, scheme in cases:
             self.check(uri, scheme=scheme)
         # invalid scheme
-        for scheme in ('', 'foo:', '\xf6lk\xfcrbis'):
+        for scheme in ('foo:', '\xf6lk\xfcrbis'):
             with self.assertRaises(ValueError, msg='scheme=%r' % scheme):
                 uricompose(scheme=scheme)
 
     def test_authority(self):
         cases = [
             ('', None),
-            ('//', ''),
-            ('//', b''),
+            ('', ''),
             ('//example.com', 'example.com'),
-            ('//example.com', b'example.com'),
             ('//example.com', 'example.com:'),
-            ('//example.com', b'example.com:'),
             ('//user@example.com', 'user@example.com'),
-            ('//user@example.com', b'user@example.com'),
             ('//example.com:42', 'example.com:42'),
-            ('//example.com:42', b'example.com:42'),
             ('//user@example.com:42', 'user@example.com:42'),
-            ('//user@example.com:42', b'user@example.com:42'),
             ('//user@127.0.0.1:42', 'user@127.0.0.1:42'),
-            ('//user@127.0.0.1:42', b'user@127.0.0.1:42'),
             ('//user@[::1]:42', 'user@[::1]:42'),
-            ('//user@[::1]:42', b'user@[::1]:42'),
             ('//user:c2VjcmV0@example.com', 'user:c2VjcmV0@example.com'),
-            ('//user:c2VjcmV0@example.com', b'user:c2VjcmV0@example.com'),
         ]
         for uri, authority in cases:
             self.check(uri, authority=authority)
         # invalid authority type
-        for authority in (True, 42, 3.14, ipaddress.IPv6Address('::1')):
+        for authority in (True, 42, 3.14, ipaddress.IPv6Address(u'::1')):
             with self.assertRaises(TypeError, msg='authority=%r' % authority):
                 uricompose(authority=authority)
 
@@ -77,35 +76,19 @@ class ComposeTest(unittest.TestCase):
         from ipaddress import IPv4Address, IPv6Address
         cases = [
             ('', [None, None, None]),
-            ('//', [None, '', None]),
-            ('//', [None, b'', None]),
+            ('', [None, '', None]),
             ('//example.com', [None, 'example.com', None]),
-            ('//example.com', [None, b'example.com', None]),
             ('//example.com', [None, 'example.com', '']),
-            ('//example.com', [None, 'example.com', b'']),
             ('//user@example.com', ['user', 'example.com', None]),
-            ('//user@example.com', [b'user', 'example.com', None]),
-            ('//user@example.com', [b'user', b'example.com', None]),
             ('//example.com:42', [None, 'example.com', '42']),
-            ('//example.com:42', [None, b'example.com', '42']),
-            ('//example.com:42', [None, b'example.com', b'42']),
             ('//example.com:42', [None, 'example.com', 42]),
-            ('//example.com:42', [None, b'example.com', 42]),
             ('//user@example.com:42', ['user', 'example.com', '42']),
-            ('//user@example.com:42', [b'user', 'example.com', '42']),
-            ('//user@example.com:42', [b'user', b'example.com', '42']),
-            ('//user@example.com:42', [b'user', b'example.com', b'42']),
             ('//user@example.com:42', ['user', 'example.com', 42]),
-            ('//user@example.com:42', [b'user', 'example.com', 42]),
-            ('//user@example.com:42', [b'user', b'example.com', 42]),
             ('//user@127.0.0.1:42', ['user', '127.0.0.1', 42]),
-            ('//user@127.0.0.1:42', ['user', b'127.0.0.1', 42]),
-            ('//user@127.0.0.1:42', ['user', IPv4Address('127.0.0.1'), 42]),
+            ('//user@127.0.0.1:42', ['user', IPv4Address(u'127.0.0.1'), 42]),
             ('//user@[::1]:42', ['user', '::1', 42]),
-            ('//user@[::1]:42', ['user', b'::1', 42]),
             ('//user@[::1]:42', ['user', '[::1]', 42]),
-            ('//user@[::1]:42', ['user', b'[::1]', 42]),
-            ('//user@[::1]:42', ['user', IPv6Address('::1'), 42]),
+            ('//user@[::1]:42', ['user', IPv6Address(u'::1'), 42]),
         ]
         for uri, authority in cases:
             self.check(uri, authority=authority)
@@ -116,7 +99,7 @@ class ComposeTest(unittest.TestCase):
             with self.assertRaises(ValueError, msg='authority=%r' % authority):
                 uricompose(authority=authority)
         # invalid host type
-        for host in (True, 42, 3.14, ipaddress.IPv6Network('2001:db00::0/24')):
+        for host in (True, 42, 3.14, ipaddress.IPv6Network(u'2001:db00::0/24')):
             with self.assertRaises(AttributeError, msg='host=%r' % host):
                 uricompose(authority=[None, host, None])
             with self.assertRaises(AttributeError, msg='host=%r' % host):
@@ -148,24 +131,19 @@ class ComposeTest(unittest.TestCase):
     def test_path(self):
         cases = [
             ('foo', 'foo'),
-            ('foo', b'foo'),
             ('foo+bar', 'foo+bar'),
-            ('foo+bar', b'foo+bar'),
             ('foo%20bar', 'foo bar'),
-            ('foo%20bar', b'foo bar'),
-            ('./this:that', 'this:that'),
-            ('./this:that', b'this:that'),
-            ('./this:that/', 'this:that/'),
-            ('./this:that/', b'this:that/'),
+            ('/this:that', 'this:that'),
+            ('/this:that/', 'this:that/'),
         ]
         for uri, path in cases:
             self.check(uri, path=path)
         # invalid path with authority
-        for path in ('foo', b'foo'):
+        for path in ('foo'):
             with self.assertRaises(ValueError, msg='path=%r' % path):
                 uricompose(authority='auth', path=path)
         # invalid path without authority
-        for path in ('//', b'//', '//foo', b'//foo'):
+        for path in ('//', '//foo'):
             with self.assertRaises(ValueError, msg='path=%r' % path):
                 uricompose(path=path)
 
@@ -173,27 +151,16 @@ class ComposeTest(unittest.TestCase):
         from collections import OrderedDict as od
 
         cases = [
-            ('?', ''),
-            ('?', b''),
-            ('?', []),
-            ('?', {}),
+            ('', ''),
+            ('', []),
+            ('', {}),
             ('?name', 'name'),
-            ('?name', b'name'),
             ('?name', [('name', None)]),
-            ('?name', [(b'name', None)]),
             ('?name', {'name': None}),
-            ('?name', {b'name': None}),
             ('?name=foo', 'name=foo'),
-            ('?name=foo', b'name=foo'),
             ('?name=foo', [('name', 'foo')]),
-            ('?name=foo', [('name', b'foo')]),
-            ('?name=foo', [(b'name', b'foo')]),
             ('?name=foo', {'name': 'foo'}),
-            ('?name=foo', {'name': b'foo'}),
             ('?name=foo', {'name': ['foo']}),
-            ('?name=foo', {'name': [b'foo']}),
-            ('?name=foo', {b'name': b'foo'}),
-            ('?name=foo', {b'name': [b'foo']}),
             ('?name=42', [('name', 42)]),
             ('?name=42', {'name': 42}),
             ('?name=42', {'name': [42]}),
@@ -201,10 +168,10 @@ class ComposeTest(unittest.TestCase):
             ('?name=foo&type=bar', od([('name', 'foo'), ('type', 'bar')])),
             ('?name=foo&name=bar', [('name', 'foo'), ('name', 'bar')]),
             ('?name=foo&name=bar', {'name': ['foo', 'bar']}),
-            ('?name=a/b/c', dict(name='a/b/c')),
-            ('?name=a:b:c', dict(name='a:b:c')),
-            ('?name=a?b?c', dict(name='a?b?c')),
-            ('?name=a@b@c', dict(name='a@b@c')),
+            ('?name=a%2Fb%2Fc', dict(name='a/b/c')),
+            ('?name=a%3Ab%3Ac', dict(name='a:b:c')),
+            ('?name=a%3Fb%3Fc', dict(name='a?b?c')),
+            ('?name=a%40b%40c', dict(name='a@b@c')),
             ('?name=a%23b%23c', dict(name='a#b#c')),
             ('?name=a%26b%26c', dict(name='a&b&c')),
             ('?name=a%3Bb%3Bc', dict(name='a;b;c')),
