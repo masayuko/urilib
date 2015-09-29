@@ -10,18 +10,18 @@ elif sys.version_info >= (3, 0):
 else:
     install_requires = ['ipaddress>=1.0.6']
 
-with io.open(os.path.join(os.path.dirname(__file__), 'uritools', '__init__.py'),
+with io.open(os.path.join(os.path.dirname(__file__), 'urilib', '__init__.py'),
              encoding='utf8') as f:
     metadata = dict(re.findall(r"__([a-z]+)__ = '([^']+)", f.read()))
 
 setup(
-    name='uritools',
+    name='urilib',
     version=metadata['version'],
-    author='Thomas Kemmer',
-    author_email='tkemmer@computer.org',
-    url='https://github.com/tkem/uritools/',
+    author='Thomas Kemmer, IGARASHI Masanao',
+    author_email='tkemmer@computer.org, syoux2@gmail.com',
+    url='https://github.com/masayuko/urilib/',
     license='MIT',
-    description='RFC 3986 compliant, Unicode-aware, scheme-agnostic replacement for urlparse',
+    description='Encode like brower does, Unicode-aware, scheme-agnostic replacement for urlparse',
     long_description=open('README.rst').read(),
     keywords='uri url urlparse urlsplit urljoin urldefrag',
     classifiers=[
@@ -40,7 +40,7 @@ setup(
         'Topic :: Internet',
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
-    packages=['uritools'],
+    packages=['urilib'],
     install_requires=install_requires,
     extras_require={
         ':python_version == "2.7"': ['ipaddress>=1.0.6'],

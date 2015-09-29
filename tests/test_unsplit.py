@@ -1,6 +1,6 @@
 import unittest
 
-from uritools import uriunsplit
+from urilib import uriunsplit
 
 
 class UnsplitTest(unittest.TestCase):

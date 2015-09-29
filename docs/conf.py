@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# uritools documentation build configuration file, created by
+# urilib documentation build configuration file, created by
 # sphinx-quickstart on Mon Feb 10 09:15:34 2014.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -19,7 +19,7 @@ import os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 sys.path.insert(0, os.path.abspath('..'))
-from uritools import __version__
+from urilib import __version__
 
 # -- General configuration -----------------------------------------------------
 
@@ -43,7 +43,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'uritools'
+project = u'urilib'
 copyright = u'2014, 2015 Thomas Kemmer'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -167,7 +167,7 @@ html_theme = 'default'
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'uritoolsdoc'
+htmlhelp_basename = 'urilibdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -186,7 +186,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ('index', 'uritools.tex', u'uritools Documentation',
+    ('index', 'urilib.tex', u'urilib Documentation',
      u'Thomas Kemmer', 'manual'),
 ]
 
@@ -216,7 +216,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'uritools', u'uritools Documentation',
+    ('index', 'urilib', u'urilib Documentation',
      [u'Thomas Kemmer'], 1)
 ]
 
@@ -230,8 +230,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    ('index', 'uritools', u'uritools Documentation',
-     u'Thomas Kemmer', 'uritools', 'One line description of project.',
+    ('index', 'urilib', u'urilib Documentation',
+     u'Thomas Kemmer', 'urilib', 'One line description of project.',
      'Miscellaneous'),
 ]
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from uritools import urinormalize
+from urilib import urinormalize
 
 
 class NormalizeTest(unittest.TestCase):

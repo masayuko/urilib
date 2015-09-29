@@ -1,7 +1,7 @@
-:mod:`uritools` --- RFC 3986 compliant replacement for :mod:`urlparse`
+:mod:`urilib` --- replacement for :mod:`urlparse`
 =======================================================================
 
-.. module:: uritools
+.. module:: urilib
 
 This module defines RFC 3986 compliant replacements for the most
 commonly used functions of the Python 2.7 Standard Library
@@ -9,7 +9,7 @@ commonly used functions of the Python 2.7 Standard Library
 
 .. code-block:: pycon
 
-    >>> from uritools import urisplit, uriunsplit, urijoin, uridefrag
+    >>> from urilib import urisplit, uriunsplit, urijoin, uridefrag
     >>> parts = urisplit('foo://user@example.com:8042/over/there?name=ferret#nose')
     >>> parts
     SplitResult(scheme='foo', authority='user@example.com:8042',

@@ -1,6 +1,6 @@
 import unittest
 
-from uritools import urijoin
+from urilib import urijoin
 
 
 class JoinTest(unittest.TestCase):

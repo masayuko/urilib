@@ -1,6 +1,6 @@
 import unittest
 
-from uritools import uridefrag
+from urilib import uridefrag
 
 
 class DefragTest(unittest.TestCase):

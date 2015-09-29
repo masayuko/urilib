@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from uritools import urisplit
+from urilib import urisplit
 
 
 class SplitTest(unittest.TestCase):

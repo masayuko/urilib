@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import unittest
 
-from uritools import (RESERVED, UNRESERVED, uriencode, uriencode_plus,
-                      uridecode, uridecode_plus, uridecode_safe,
-                      uridecode_safe_plus)
+from urilib import (RESERVED, UNRESERVED, uriencode, uriencode_plus,
+                    uridecode, uridecode_plus, uridecode_safe,
+                    uridecode_safe_plus)
 
 
 class EncodingTest(unittest.TestCase):

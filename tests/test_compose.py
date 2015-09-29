@@ -2,7 +2,7 @@
 import ipaddress
 import unittest
 
-from uritools import uricompose
+from urilib import uricompose
 
 
 class ComposeTest(unittest.TestCase):
