@@ -1,4 +1,4 @@
-import codecs, os.path, re, sys
+import io, os.path, re, sys
 
 from setuptools import setup
 
@@ -10,8 +10,8 @@ elif sys.version_info >= (3, 0):
 else:
     install_requires = ['ipaddress>=1.0.6']
 
-with codecs.open(os.path.join(os.path.dirname(__file__), 'uritools', '__init__.py'),
-                 encoding='utf8') as f:
+with io.open(os.path.join(os.path.dirname(__file__), 'uritools', '__init__.py'),
+             encoding='utf8') as f:
     metadata = dict(re.findall(r"__([a-z]+)__ = '([^']+)", f.read()))
 
 setup(
