@@ -139,7 +139,7 @@ def uridecode_safe_plus(uristring, encoding='utf-8', errors='replace'):
         uristring = re.sub(b'\+', b' ', uristring)
     else:
         uristring = re.sub('\+', ' ', uristring)
-    return uridecode_plus(uristring, encoding, errors)
+    return uridecode_safe(uristring, encoding, errors)
 
 
 def idnencode(domain, encoding='utf-8', errors='strict'):
